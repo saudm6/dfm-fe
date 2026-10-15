@@ -57,7 +57,7 @@ Each heading names the feature its steps finish. Shared steps sit under the firs
 - [x] **11.** [dfm-fe#2](https://github.com/saudm6/dfm-fe/issues/2) Build the theme, tokens, and number formatting. Wave 2. Waits on step 10 ([dfm-fe#1](https://github.com/saudm6/dfm-fe/issues/1)).
 - [x] **12.** [dfm-fe#3](https://github.com/saudm6/dfm-fe/issues/3) Generate the typed API client. Wave 4. Waits on step 4 ([dfm-be#4](https://github.com/saudm6/dfm-be/issues/4)), step 10 ([dfm-fe#1](https://github.com/saudm6/dfm-fe/issues/1)).
 - [ ] **13.** [dfm-fe#4](https://github.com/saudm6/dfm-fe/issues/4) Add the WebSocket client service. Wave 6. Waits on step 7 ([dfm-be#7](https://github.com/saudm6/dfm-be/issues/7)), step 10 ([dfm-fe#1](https://github.com/saudm6/dfm-fe/issues/1)).
-- [ ] **14.** [dfm-fe#5](https://github.com/saudm6/dfm-fe/issues/5) Add login and the auth guard. Wave 5. Waits on step 5 ([dfm-be#5](https://github.com/saudm6/dfm-be/issues/5)), step 12 ([dfm-fe#3](https://github.com/saudm6/dfm-fe/issues/3)).
+- [x] **14.** [dfm-fe#5](https://github.com/saudm6/dfm-fe/issues/5) Add login and the auth guard. Wave 5. Waits on step 5 ([dfm-be#5](https://github.com/saudm6/dfm-be/issues/5)), step 12 ([dfm-fe#3](https://github.com/saudm6/dfm-fe/issues/3)).
 - [ ] **15.** [dfm-fe#6](https://github.com/saudm6/dfm-fe/issues/6) Build the terminal shell with panels and a status bar. Wave 7. Waits on step 8 ([dfm-be#8](https://github.com/saudm6/dfm-be/issues/8)), step 9 ([dfm-be#9](https://github.com/saudm6/dfm-be/issues/9)), step 11 ([dfm-fe#2](https://github.com/saudm6/dfm-fe/issues/2)), step 13 ([dfm-fe#4](https://github.com/saudm6/dfm-fe/issues/4)), step 14 ([dfm-fe#5](https://github.com/saudm6/dfm-fe/issues/5)).
 
 ### F01 Security master, search, and command line

@@ -18,8 +18,8 @@ export interface CsrfSource {
 }
 
 /**
- * CSRF hook for the auth unit (FE-05). Nothing provides it yet; once the
- * backend's CSRF scheme is in the contract, provide a CsrfSource here.
+ * CSRF source for the API interceptor. app.config.ts provides the session's
+ * token (sessionCsrf in core/auth/session.ts).
  */
 export const API_CSRF = new InjectionToken<CsrfSource>('API_CSRF');
 
