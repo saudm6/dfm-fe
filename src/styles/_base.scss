@@ -1,0 +1,34 @@
+html {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height);
+  // A monospace face already has fixed-width digits; tabular-nums keeps them aligned if a
+  // fallback proportional face is used for a glyph.
+  font-variant-numeric: tabular-nums;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  font-variant-numeric: inherit;
+}
+
+.change-up {
+  color: var(--color-up);
+}
+
+.change-down {
+  color: var(--color-down);
+}
+
+.change-flat {
+  color: var(--color-flat);
+}
