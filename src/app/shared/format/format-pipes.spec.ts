@@ -17,6 +17,13 @@ import { VolumePipe } from './volume-pipe';
     <span id="aed">{{ 1234.5 | money: 'AED' }}</span>
     <span id="usd">{{ 1234.5 | money: 'USD' }}</span>
     <span id="missing">{{ null | price: 3 }}</span>
+    <span id="wire-price">{{ '11.4' | price: 2 }}</span>
+    <span id="wire-down" [class]="'-0.25' | changeClass">{{ '-0.25' | percentChange }}</span>
+    <span id="rounded-flat" [class]="-0.004 | changeClass">{{ -0.004 | percentChange }}</span>
+    <span id="rounded-3" [class]="-0.004 | changeClass: 3">{{ -0.004 | percentChange: 3 }}</span>
+    <span id="wire-volume">{{ '164267392.04' | volume }}</span>
+    <span id="wire-aed">{{ '1234.5' | money: 'AED' }}</span>
+    <span id="bad-decimals">{{ 5.4 | price: -1 }}</span>
   `,
 })
 class PipesHost {}
@@ -62,5 +69,24 @@ describe('format pipes', () => {
 
   it('renders a dash for a missing number', () => {
     expect(text('missing')).toBe('—');
+  });
+
+  it('renders decimal strings from the backend', () => {
+    expect(text('wire-price')).toBe('11.40');
+    expect(text('wire-down')).toBe('-0.25%');
+    expect(className('wire-down')).toBe('change-down');
+    expect(text('wire-volume')).toBe('164.27M');
+    expect(text('wire-aed')).toBe('AED 1,234.50');
+  });
+
+  it('colors a change by the value it prints', () => {
+    expect(text('rounded-flat')).toBe('0.00%');
+    expect(className('rounded-flat')).toBe('change-flat');
+    expect(text('rounded-3')).toBe('-0.004%');
+    expect(className('rounded-3')).toBe('change-down');
+  });
+
+  it('renders a dash for invalid decimals', () => {
+    expect(text('bad-decimals')).toBe('—');
   });
 });

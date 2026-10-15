@@ -1,10 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { formatPrice } from './number-format';
+import { DecimalInput, formatPrice } from './number-format';
 
 /** `{{ last | price: instrument.decimals }}` */
 @Pipe({ name: 'price' })
 export class PricePipe implements PipeTransform {
-  transform(value: number | null | undefined, decimals: number): string {
+  transform(value: DecimalInput, decimals: number | null | undefined): string {
     return formatPrice(value, decimals);
   }
 }

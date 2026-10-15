@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Freshness, FreshnessBadge } from './freshness-badge';
 
 describe('FreshnessBadge', () => {
-  async function render(freshness: Freshness) {
+  async function render(freshness: Freshness | null | undefined) {
     const fixture = TestBed.createComponent(FreshnessBadge);
     fixture.componentRef.setInput('freshness', freshness);
     await fixture.whenStable();
@@ -27,5 +27,18 @@ describe('FreshnessBadge', () => {
     const host = fixture.nativeElement as HTMLElement;
     expect(host.getAttribute('data-freshness')).toBe('realtime');
     expect(host.textContent).toBe('RT');
+  });
+
+  it.each([
+    ['stale', 'stale'],
+    ['toString', 'toString'],
+    [null, null],
+    [undefined, null],
+  ])('shows the unknown value %s as a neutral ?', async (freshness, attribute) => {
+    const host = (await render(freshness as Freshness | null | undefined))
+      .nativeElement as HTMLElement;
+    expect(host.getAttribute('data-freshness')).toBe(attribute);
+    expect(host.textContent).toBe('?');
+    expect(host.querySelector('abbr')?.getAttribute('title')).toBe('Unknown freshness');
   });
 });

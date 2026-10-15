@@ -3,11 +3,18 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 /** How current a number is, as the backend reports it on every quote. */
 export type Freshness = 'realtime' | 'delayed' | 'eod';
 
-const labels: Record<Freshness, { short: string; long: string }> = {
+interface Label {
+  short: string;
+  long: string;
+}
+
+const labels: Record<Freshness, Label> = {
   realtime: { short: 'RT', long: 'Real-time' },
   delayed: { short: 'DLY', long: 'Delayed' },
   eod: { short: 'EOD', long: 'End of day' },
 };
+
+const unknown: Label = { short: '?', long: 'Unknown freshness' };
 
 /** `<dfm-freshness [freshness]="quote.freshness" />` */
 @Component({
@@ -47,7 +54,11 @@ const labels: Record<Freshness, { short: string; long: string }> = {
   `,
 })
 export class FreshnessBadge {
-  readonly freshness = input.required<Freshness>();
+  readonly freshness = input.required<Freshness | null | undefined>();
 
-  protected readonly label = computed(() => labels[this.freshness()]);
+  // The value arrives from the wire, so a missing or new value gets a neutral badge, not an error.
+  protected readonly label = computed(() => {
+    const freshness = this.freshness();
+    return freshness && Object.hasOwn(labels, freshness) ? labels[freshness] : unknown;
+  });
 }

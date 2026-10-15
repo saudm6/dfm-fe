@@ -86,7 +86,7 @@ Shared formatting lives in `src/app/shared/`:
 | `<dfm-freshness [freshness]="q.freshness" />`      | `RT`, `DLY`, or `EOD` badge                 |
 | `<td appAutoDir>{{ nameAr }}</td>`                 | `dir="auto"`, so Arabic reads right to left |
 
-Missing or non-finite numbers print as `—`. The same functions (`formatPrice`, `formatPercentChange`, `formatVolume`, `formatCurrency`, `changeDirection`) are exported from `src/app/shared/format` for code that cannot use a pipe, such as grid value formatters.
+Every pipe and function takes a number or a decimal string as the backend sends it (`"11.4"`), and formats a string exactly, without a float round trip. Missing or non-finite numbers, strings that are not plain decimals, and invalid decimals arguments (not an integer from 0 to 20) print as `—`. Zero never prints with a minus. The sign and color of a change come from the value rounded to the shown decimals, so `-0.004` prints `0.00%` and is flat; pass the same decimals to `changeClass` as to `percentChange`. An unknown freshness value shows a neutral `?` badge. The same functions (`formatPrice`, `formatPercentChange`, `formatVolume`, `formatCurrency`, `changeDirection`) are exported from `src/app/shared/format` for code that cannot use a pipe, such as grid value formatters.
 
 ## CI
 
