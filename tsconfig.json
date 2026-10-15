@@ -12,6 +12,8 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
+    // ES2023.Intl types Intl.NumberFormat.format on decimal strings and signDisplay "negative".
+    "lib": ["ES2022", "ES2023.Intl", "DOM", "DOM.Iterable"],
     "module": "preserve"
   },
   "angularCompilerOptions": {

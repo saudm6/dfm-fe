@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
-    "lint": "ng lint",
+    "lint": "ng lint && npm run typecheck:e2e",
+    "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "e2e": "playwright test",
@@ -15,6 +16,9 @@
     "api:gen:main": "node scripts/api-gen.mjs https://raw.githubusercontent.com/saudm6/dfm-be/main/api/openapi.yaml"
   },
   "private": true,
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
   "packageManager": "npm@10.9.8",
   "dependencies": {
     "@angular/common": "^22.2.0",
@@ -32,6 +36,7 @@
     "@angular/compiler-cli": "^22.2.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.64.1",
+    "@types/node": "^22.20.5",
     "angular-eslint": "22.6.0",
     "eslint": "^10.12.0",
     "jsdom": "^30.0.0",

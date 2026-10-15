@@ -1,0 +1,67 @@
+// Design tokens. Components read these custom properties and never hard-code colors or sizes.
+// Amber on black is the default theme; `<html data-theme="light">` switches to the light theme.
+// e2e/theme.spec.ts checks every text color below against every background at WCAG AA (4.5:1).
+
+:root {
+  color-scheme: dark;
+
+  --color-bg: #000000;
+  --color-surface: #0d0d0d;
+  --color-surface-raised: #1a1a1a;
+  --color-border: #3d3d3d;
+
+  --color-text: #ffb000;
+  --color-text-strong: #ffd480;
+  --color-text-muted: #c08a1e;
+  --color-accent: #5cadff;
+
+  --color-up: #21d07a;
+  --color-down: #ff5c5c;
+  --color-flat: var(--color-text-muted);
+
+  --color-fresh-realtime: #21d07a;
+  --color-fresh-delayed: #ffd400;
+  --color-fresh-eod: #a8a8a8;
+
+  --font-mono:
+    'JetBrains Mono', 'IBM Plex Mono', 'Cascadia Mono', 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', 'DejaVu Sans Mono', monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+  --line-height: 1.35;
+
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 24px;
+
+  --radius: 2px;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --color-bg: #ffffff;
+  --color-surface: #f6f5f1;
+  --color-surface-raised: #ebe9e2;
+  --color-border: #c4c0b6;
+
+  --color-text: #1c1a17;
+  --color-text-strong: #000000;
+  --color-text-muted: #5e5a52;
+  --color-accent: #0b57b8;
+
+  --color-up: #006b3c;
+  --color-down: #c0141b;
+
+  --color-fresh-realtime: #006b3c;
+  --color-fresh-delayed: #8a5300;
+  --color-fresh-eod: #5e5a52;
+}
