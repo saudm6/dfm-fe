@@ -35,6 +35,86 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sign in and start a session
+     * @description Checks the username and password and starts a session. The response
+     *     sets the session cookie and carries the session's CSRF token. An
+     *     unknown username and a wrong password get the same 401. The request
+     *     must be `Content-Type: application/json` (415 unsupported_media_type
+     *     otherwise) and at most 4096 bytes (400 bad_request otherwise). A
+     *     successful login ends the session named by the request's existing
+     *     `dfm_session` cookie, if any.
+     */
+    post: operations['login'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/logout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * End the current session
+     * @description Deletes the session on the server and expires the cookie.
+     */
+    post: operations['logout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Describe the signed-in account and its session */
+    get: operations['getMe'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/market/status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Report the DFM session now and when continuous trading next opens */
+    get: operations['getMarketStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -44,7 +124,9 @@ export interface components {
       /**
        * @description Stable machine-readable reason in snake_case. Clients branch on
        *     this, never on message. Known codes: bad_request, unauthorized,
-       *     forbidden, not_found, method_not_allowed, conflict, internal.
+       *     forbidden, not_found, method_not_allowed, conflict,
+       *     unsupported_media_type, internal, unavailable (a dependency such
+       *     as the database did not answer; retry later).
        * @example not_found
        */
       code: string;
@@ -197,6 +279,50 @@ export interface components {
        */
       db: 'ok' | 'unavailable';
     };
+    /**
+     * @description owner has every permission, including market data and trading.
+     *     member can use chat and layouts only.
+     * @enum {string}
+     */
+    Role: 'owner' | 'member';
+    LoginRequest: {
+      /**
+       * @description Case-insensitive.
+       * @example saud
+       */
+      username: string;
+      /** Format: password */
+      password: string;
+    };
+    /** @description The signed-in account and its session. */
+    Me: {
+      /** Format: int64 */
+      id: number;
+      /** @example saud */
+      username: string;
+      role: components['schemas']['Role'];
+      /** @description Send in the X-CSRF-Token header on POST, PUT, PATCH, and DELETE. */
+      csrfToken: string;
+    };
+    /**
+     * @description The phase of the DFM trading day in Asia/Dubai: pre-open from 09:30,
+     *     continuous from 10:00, closing-auction from 14:45 (DFM's pre-closing
+     *     and trade-at-last sessions), and closed from 15:00 and on days DFM
+     *     does not trade. The times are the defaults; the server's config sets
+     *     them.
+     * @enum {string}
+     */
+    MarketSession: 'pre-open' | 'continuous' | 'closing-auction' | 'closed';
+    MarketStatus: {
+      session: components['schemas']['MarketSession'];
+      /**
+       * Format: date-time
+       * @description The next start of continuous trading strictly after now, in
+       *     +04:00. This is the continuous open, not the pre-open.
+       * @example 2026-10-19T10:00:00+04:00
+       */
+      nextOpen: string;
+    };
   };
   responses: {
     /** @description The request failed. The body says why. */
@@ -211,7 +337,13 @@ export interface components {
   };
   parameters: never;
   requestBodies: never;
-  headers: never;
+  headers: {
+    /**
+     * @description `no-store`, on responses that carry the CSRF token, so no cache
+     *     keeps it.
+     */
+    NoStore: 'no-store';
+  };
   pathItems: never;
 }
 export type $defs = Record<string, never>;
@@ -274,6 +406,149 @@ export interface operations {
         };
         content: {
           'application/yaml': string;
+        };
+      };
+      default: components['responses']['Error'];
+    };
+  };
+  login: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginRequest'];
+      };
+    };
+    responses: {
+      /** @description Signed in. */
+      200: {
+        headers: {
+          /** @description The session cookie, `dfm_session=...; Path=/; Max-Age=...; HttpOnly; Secure; SameSite=Strict`. */
+          'Set-Cookie': string;
+          'Cache-Control': components['headers']['NoStore'];
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Me'];
+        };
+      };
+      /** @description The username or password is wrong. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "code": "unauthorized",
+           *       "message": "invalid username or password"
+           *     }
+           */
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The request body is not `application/json`. */
+      415: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "code": "unsupported_media_type",
+           *       "message": "send the login request as application/json"
+           *     }
+           */
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      default: components['responses']['Error'];
+    };
+  };
+  logout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Signed out. */
+      204: {
+        headers: {
+          /** @description Expires the session cookie, `dfm_session=; Path=/; Max-Age=0; ...`. */
+          'Set-Cookie': string;
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components['responses']['Error'];
+    };
+  };
+  getMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The signed-in account. */
+      200: {
+        headers: {
+          'Cache-Control': components['headers']['NoStore'];
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Me'];
+        };
+      };
+      default: components['responses']['Error'];
+    };
+  };
+  getMarketStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The current session and the next open, from the trading calendar. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "session": "closed",
+           *       "nextOpen": "2026-10-19T10:00:00+04:00"
+           *     }
+           */
+          'application/json': components['schemas']['MarketStatus'];
+        };
+      };
+      /** @description The trading calendar could not be loaded within 2 seconds. */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "code": "unavailable",
+           *       "message": "trading calendar unavailable"
+           *     }
+           */
+          'application/json': components['schemas']['Error'];
         };
       };
       default: components['responses']['Error'];

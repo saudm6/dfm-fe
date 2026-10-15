@@ -50,8 +50,13 @@ function redirectToLogin(router: Router): void {
   const pending = navigation ? (navigation.finalUrl ?? navigation.extractedUrl) : null;
   // A 401 from a request made on, or on the way to, the login page (its guard
   // checking the session, a failed sign-in) must not navigate there again: that
-  // navigation would rerun the guard and loop.
-  if (isLoginPage(router, current) || (pending && isLoginPage(router, pending))) {
+  // navigation would rerun the guard and loop. A navigation that asked for the
+  // login page counts even when a redirect has taken it elsewhere.
+  const onTheWay = navigation ? [navigation.extractedUrl, navigation.finalUrl] : [];
+  if (
+    isLoginPage(router, current) ||
+    onTheWay.some((url) => url !== undefined && isLoginPage(router, url))
+  ) {
     return;
   }
   // The router's serializer only produces paths on this app: it turns a tree

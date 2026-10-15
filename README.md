@@ -59,10 +59,11 @@ Services type their requests and responses with the generated schema, so when th
 
 - `schema.d.ts` generated contract types.
 - `api-types.ts` `Schemas` (every component schema by name), `ApiPath` (every contract path), `ErrorBody`.
-- `api-config.ts` `API_BASE_URL` (default `/api`), `apiUrl(path)`, and the `API_CSRF` hook.
+- `api-config.ts` `API_BASE_URL` (default `/api`), `apiUrl(path)`, and the `API_CSRF` hook (`app.config.ts` provides the session's token).
 - `api-error.ts` `ApiError` with `status`, `code` (the backend's snake_case reason; `network_error` when the backend is unreachable, including a proxy's 502/503/504 with a non-JSON body; `unexpected_response` for any other response without an Error body), `message`, and the raw `body`.
-- `api-interceptor.ts` for requests under `API_BASE_URL`: sends credentials (`withCredentials`), adds the CSRF header to state-changing requests when `API_CSRF` is provided, navigates to `/login?returnUrl=<url>` on 401 (`returnUrl` is the in-app URL being left, or being navigated to when the 401 interrupts a navigation; nothing happens when the current page or the navigation in flight is `/login` itself), and rethrows every HTTP failure as `ApiError`.
+- `api-interceptor.ts` for requests under `API_BASE_URL`: sends credentials (`withCredentials`), adds the CSRF header to state-changing requests when `API_CSRF` is provided, navigates to `/login?returnUrl=<url>` on 401 (`returnUrl` is the in-app URL being left, or being navigated to when the 401 interrupts a navigation; nothing happens when the current page is `/login`, or the navigation in flight asked for or ended at `/login`), and rethrows every HTTP failure as `ApiError`.
 - `health-api.ts` `HealthApi`, the service for `GET /healthz`.
+- `auth-api.ts` `AuthApi` for `POST /auth/login`, `POST /auth/logout`, and `GET /me`, with the `Me` and `Role` types.
 
 ### Adding a service for a feature
 
@@ -70,6 +71,19 @@ Services type their requests and responses with the generated schema, so when th
 2. Create `src/app/api/<resource>-api.ts` with one `@Injectable({ providedIn: 'root' })` class per resource, following `health-api.ts`: build URLs with `apiUrl('/path')` (the argument must be a contract path; encode path parameters with `encodeURIComponent`), and type bodies with `Schemas['<Name>']`.
 3. Return the `Observable` from `HttpClient` unchanged. Callers catch `ApiError` and branch on `code`. Only handle an error status in the service when the contract declares its own body for it, as `/healthz` does for 503.
 4. Test it next to the file with `provideHttpClient(withInterceptors([apiInterceptor]))` and `HttpTestingController`, as in `health-api.spec.ts`.
+
+## Sign-in and roles
+
+Every route except `/login` sits behind `authGuard` (`src/app/core/auth/auth-guards.ts`). The guard asks `Session.restore()`, which calls `GET /me` once per page load; later navigations reuse the answer. Without a session the guard sends the user to `/login?returnUrl=<url>`. After signing in, the login page goes to `returnUrl` when it is a path on this app (one leading `/`, not `//` or `/\`), and to `/` otherwise.
+
+`Session` (`src/app/core/auth/session.ts`) is the one place that knows who is signed in:
+
+- `user()`, `role()` (`'owner' | 'member'`, or `null` when signed out), and `csrfToken()` are signals.
+- `canSeeMarketData()` is true for `owner` only. Hide every function that needs market data (quotes, history, orders, positions) behind it, in templates with `@if (session.canSeeMarketData())`, and on routes with `canActivate: [marketDataGuard]`, which sends a `member` to `/`.
+- `login(username, password)` and `logout()` call the backend. The session cookie is HttpOnly, so the app never reads it; it keeps the CSRF token from the login and `/me` responses, and `sessionCsrf` hands it to the API interceptor as `X-CSRF-Token`.
+- `sessionInterceptor` forgets the account when any API request gets 401. It comes before `apiInterceptor` in `app.config.ts`.
+
+To sign in locally, create accounts in dfm-be with `dfm user create --username <name> --role owner|member` (it reads the password from stdin) and run it with `DFM_COOKIE_SECURE=false`, as `make run` does.
 
 ## End-to-end tests
 
@@ -80,7 +94,7 @@ npx playwright install chromium
 npm run e2e
 ```
 
-Playwright starts `ng serve --port 0`, reads the chosen port from the server output into `E2E_PORT`, and uses it as `baseURL`. Tests live in `e2e/`, the config is `playwright.config.ts`.
+Playwright starts `ng serve --port 0`, reads the chosen port from the server output into `E2E_PORT`, and uses it as `baseURL`. Tests live in `e2e/`, the config is `playwright.config.ts`. No backend runs in CI, so tests that need the API answer `/api` themselves with `page.route` in the contract's shapes; `e2e/auth.spec.ts` keeps a fake session that way.
 
 ## Layout
 
@@ -123,4 +137,4 @@ Every pipe and function takes a number or a decimal string as the backend sends 
 
 ## CI
 
-`.github/workflows/ci.yml` runs on every pull request and on pushes to `main`. Jobs: `lint` (ESLint, e2e type-check, and Prettier check), `test` (unit tests), `build` (production build), and `e2e` (Playwright smoke test).
+`.github/workflows/ci.yml` runs on every pull request and on pushes to `main`. Jobs: `lint` (ESLint, e2e type-check, and Prettier check), `test` (unit tests), `build` (production build), and `e2e` (Playwright tests).

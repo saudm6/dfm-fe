@@ -1,0 +1,30 @@
+<form
+  class="login"
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  aria-labelledby="login-title"
+  novalidate
+>
+  <h2 id="login-title">Sign in</h2>
+  <label for="login-username">Username</label>
+  <input
+    id="login-username"
+    formControlName="username"
+    autocomplete="username"
+    autocapitalize="none"
+    spellcheck="false"
+    required
+  />
+  <label for="login-password">Password</label>
+  <input
+    id="login-password"
+    type="password"
+    formControlName="password"
+    autocomplete="current-password"
+    required
+  />
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+  <button type="submit" [disabled]="pending()">{{ pending() ? 'Signing in…' : 'Sign in' }}</button>
+</form>

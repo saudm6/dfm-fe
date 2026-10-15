@@ -1,0 +1,12 @@
+<div class="session-bar">
+  <span class="user">{{ user()?.username }}</span>
+  <span class="role">{{ role() }}</span>
+  <button type="button" (click)="signOut()">Sign out</button>
+</div>
+@if (canSeeMarketData()) {
+  <section class="market" aria-label="Market data">
+    <p>Market data panels appear here.</p>
+  </section>
+} @else {
+  <p class="notice">Market data is available to owner accounts only.</p>
+}

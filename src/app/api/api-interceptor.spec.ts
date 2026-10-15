@@ -43,10 +43,11 @@ function setup(
   TestBed.configureTestingModule({
     providers: [
       provideRouter([
+        // First, so a test can replace one of the routes below.
+        ...extraRoutes,
         { path: 'login', component: Blank, canActivate: loginGuards },
         { path: 'login-help', component: Blank },
         { path: 'watch', component: Blank },
-        ...extraRoutes,
         { path: '**', component: Blank },
       ]),
       provideHttpClient(withInterceptors([apiInterceptor])),
@@ -250,6 +251,23 @@ describe('apiInterceptor', () => {
     await settled(router);
     httpMock.expectNone('/api/me');
     expect(router.url).toBe('/login');
+  });
+
+  it('does not loop when a navigation to the login page is redirected and its guard gets 401', async () => {
+    const { httpMock, router } = setup(
+      [],
+      [
+        { path: 'login', redirectTo: 'help' },
+        { path: 'help', component: Blank, canActivate: [sessionGuard] },
+      ],
+    );
+    await router.navigateByUrl('/watch');
+    const navigate = vi.spyOn(router, 'navigateByUrl');
+    const navigation = router.navigateByUrl('/login');
+    (await guardRequest(httpMock, '/api/me')).flush(UNAUTHORIZED, UNAUTHORIZED_STATUS);
+    expect(await navigation).toBe(true);
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(router.url).toBe('/help');
   });
 
   it('does not redirect on other error statuses', async () => {
