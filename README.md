@@ -60,8 +60,8 @@ Services type their requests and responses with the generated schema, so when th
 - `schema.d.ts` generated contract types.
 - `api-types.ts` `Schemas` (every component schema by name), `ApiPath` (every contract path), `ErrorBody`.
 - `api-config.ts` `API_BASE_URL` (default `/api`), `apiUrl(path)`, and the `API_CSRF` hook.
-- `api-error.ts` `ApiError` with `status`, `code` (the backend's snake_case reason, or `network_error` / `unexpected_response`), `message`, and the raw `body`.
-- `api-interceptor.ts` for requests under `API_BASE_URL`: sends credentials (`withCredentials`), adds the CSRF header to state-changing requests when `API_CSRF` is provided, navigates to `/login` on 401 (except from `/login` itself), and rethrows every HTTP failure as `ApiError`.
+- `api-error.ts` `ApiError` with `status`, `code` (the backend's snake_case reason; `network_error` when the backend is unreachable, including a proxy's 502/503/504 with a non-JSON body; `unexpected_response` for any other response without an Error body), `message`, and the raw `body`.
+- `api-interceptor.ts` for requests under `API_BASE_URL`: sends credentials (`withCredentials`), adds the CSRF header to state-changing requests when `API_CSRF` is provided, navigates to `/login?returnUrl=<url>` on 401 (`returnUrl` is the in-app URL being left, or being navigated to when the 401 interrupts a navigation; nothing happens when the current page or the navigation in flight is `/login` itself), and rethrows every HTTP failure as `ApiError`.
 - `health-api.ts` `HealthApi`, the service for `GET /healthz`.
 
 ### Adding a service for a feature
