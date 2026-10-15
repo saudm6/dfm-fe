@@ -10,7 +10,9 @@
     "lint": "ng lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "api:gen": "node scripts/api-gen.mjs",
+    "api:gen:main": "node scripts/api-gen.mjs https://raw.githubusercontent.com/saudm6/dfm-be/main/api/openapi.yaml"
   },
   "private": true,
   "packageManager": "npm@10.9.8",
@@ -33,9 +35,15 @@
     "angular-eslint": "22.6.0",
     "eslint": "^10.12.0",
     "jsdom": "^30.0.0",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "8.71.0",
     "vitest": "^5.0.0"
+  },
+  "overrides": {
+    "openapi-typescript": {
+      "typescript": "$typescript"
+    }
   }
 }

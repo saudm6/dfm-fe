@@ -2,6 +2,7 @@
 const target = process.env.DFM_BACKEND_URL ?? 'http://localhost:8080';
 
 export default {
-  '/api': { target, secure: false },
+  // The Go service serves the contract's paths at its root, so /api/healthz goes to /healthz.
+  '/api': { target, secure: false, pathRewrite: { '^/api': '' } },
   '/ws': { target, secure: false, ws: true },
 };
